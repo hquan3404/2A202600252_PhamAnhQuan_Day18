@@ -1,3 +1,22 @@
 [
-  {"question": "hihi cả nhà tự tạo testset bằng cơm nhé", "ground_truth": "Không kịp tạo luôn"},
+  {
+    "question": "Quy định về số ngày nghỉ phép của nhân viên chính thức là bao nhiêu?",
+    "ground_truth": "Mỗi nhân viên chính thức được nghỉ phép 12 ngày một năm."
+  },
+  {
+    "question": "Nhân viên làm việc từ xa cần dùng ứng dụng gì để đảm bảo an toàn thông tin?",
+    "ground_truth": "Nhân viên làm việc từ xa bắt buộc phải sử dụng VPN của công ty."
+  },
+  {
+    "question": "Bao lâu thì tôi phải thay đổi mật khẩu máy tính một lần?",
+    "ground_truth": "Mật khẩu máy tính bắt buộc phải thay đổi định kỳ 3 tháng 1 lần."
+  },
+  {
+    "question": "Khi máy tính bị hỏng thì tôi cần gọi cho số nào để nhờ IT hỗ trợ?",
+    "ground_truth": "Bạn có thể liên hệ với bộ phận IT qua tổng đài nội bộ số 111."
+  },
+  {
+    "question": "Nếu nghỉ ốm đột xuất thì tôi cần báo cáo như thế nào?",
+    "ground_truth": "Trong trường hợp nghỉ ốm đột xuất, nhân viên có thể báo cáo trực tiếp cho quản lý vào buổi sáng cùng ngày."
+  }
 ]

@@ -1,12 +1,16 @@
 """Production RAG Pipeline — Bài tập NHÓM: ghép M1+M2+M3+M4."""
 
 import os, sys, time
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.m1_chunking import load_documents, chunk_hierarchical
 from src.m2_search import HybridSearch
-from src.m3_rerank import CrossEncoderReranker
+from src.m3_rerank import FlashrankReranker
 from src.m4_eval import load_test_set, evaluate_ragas, failure_analysis, save_report
 from src.m5_enrichment import enrich_chunks
 from config import RERANK_TOP_K
@@ -45,32 +49,35 @@ def build_pipeline():
 
     # Step 4: Reranker (M3)
     print("\n[4/4] Loading reranker...")
-    reranker = CrossEncoderReranker()
+    reranker = FlashrankReranker()
 
     return search, reranker
 
-
-def run_query(query: str, search: HybridSearch, reranker: CrossEncoderReranker) -> tuple[str, list[str]]:
+def run_query(query: str, search: HybridSearch, reranker: FlashrankReranker) -> tuple[str, list[str]]:
     """Run single query through pipeline."""
     results = search.search(query)
     docs = [{"text": r.text, "score": r.score, "metadata": r.metadata} for r in results]
     reranked = reranker.rerank(query, docs, top_k=RERANK_TOP_K)
     contexts = [r.text for r in reranked] if reranked else [r.text for r in results[:3]]
 
-    # TODO (nhóm): Replace with LLM generation for better scores
-    # from openai import OpenAI
-    # client = OpenAI()
-    # context_str = "\n\n".join(contexts)
-    # resp = client.chat.completions.create(model="gpt-4o-mini", messages=[
-    #     {"role": "system", "content": "Trả lời CHỈ dựa trên context. Nếu không có → nói 'Không tìm thấy.'"},
-    #     {"role": "user", "content": f"Context:\n{context_str}\n\nCâu hỏi: {query}"},
-    # ])
-    # answer = resp.choices[0].message.content
-    answer = contexts[0] if contexts else "Không tìm thấy thông tin."
+    import google.generativeai as genai
+    from config import GEMINI_API_KEY
+    if GEMINI_API_KEY:
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel("gemini-3.1-flash-lite-preview")
+        context_str = "\n\n".join(contexts)
+        prompt = f"Trả lời CHỈ dựa trên context. Nếu không có → nói 'Không tìm thấy.'\n\nContext:\n{context_str}\n\nCâu hỏi: {query}"
+        try:
+            resp = model.generate_content(prompt)
+            answer = resp.text.strip()
+        except Exception:
+            answer = contexts[0] if contexts else "Không tìm thấy thông tin."
+    else:
+        answer = contexts[0] if contexts else "Không tìm thấy thông tin."
     return answer, contexts
 
 
-def evaluate_pipeline(search: HybridSearch, reranker: CrossEncoderReranker):
+def evaluate_pipeline(search: HybridSearch, reranker: FlashrankReranker):
     """Run evaluation on test set."""
     print("\n[Eval] Running queries...")
     test_set = load_test_set()

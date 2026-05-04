@@ -1,0 +1,12 @@
+pytest
+qdrant-client
+underthesea
+rank_bm25
+FlagEmbedding
+flashrank
+ragas
+python-dotenv
+google-generativeai
+langchain-google-genai
+datasets
+sentence-transformers

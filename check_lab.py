@@ -10,6 +10,10 @@ import os
 import sys
 import subprocess
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+
 
 def check_file(path: str, required: bool = True) -> bool:
     if os.path.exists(path):
